@@ -1,2 +1,12 @@
 server:
   port: 8080
+
+spring:
+  aop:
+    proxy-target-class: true
+
+chat-bot:
+  classId: 17556834
+  cookie: csrftoken=7PgbSKQ0UpDlmpNYVfxJCypDDJ1IkpC1; sessionid=m0r4b29705aovbznr2sme6xdahxp2oxq; classroomId=17556834; classroom_id=17556834; django_language=zh-cn
+  token: 7PgbSKQ0UpDlmpNYVfxJCypDDJ1IkpC1
+  text: "2333"
