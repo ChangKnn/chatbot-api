@@ -2,6 +2,7 @@ package com.kunchang.chatbot.api;
 
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -66,6 +67,46 @@ public class ApiTest {
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             String res = EntityUtils.toString(response.getEntity());
             System.out.println(res);
+        } else {
+            System.out.println(response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    public void chatGPTAPItest() throws IOException {
+
+        String proxyHost = "127.0.0.1";
+        int proxyPort = 7890;
+        HttpHost httpProxy = new HttpHost(proxyHost, proxyPort);
+        CloseableHttpClient client = HttpClientBuilder.create().setProxy(httpProxy).build();
+
+        HttpPost post = new HttpPost("https://api.openai.com/v1/chat/completions");
+        post.addHeader("Content-Type", "application/json");
+        post.addHeader("Authorization", "Bearer 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");
+
+        String jsonParam = "{\n" +
+                "  \"model\": \"gpt-3.5-turbo\",\n" +
+                "  \"messages\": [\n" +
+                "    {\n" +
+                "      \"role\": \"system\",\n" +
+                "      \"content\": \"100字内回答以下问题\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"role\": \"user\",\n" +
+                "      \"content\": \"简述ChatGPT\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"max_tokens\": 556\n" +
+                "}";
+
+
+        StringEntity stringEntity = new StringEntity(jsonParam, ContentType.create("text/json", "UTF-8"));
+        post.setEntity(stringEntity);
+
+        CloseableHttpResponse response = client.execute(post);
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            String string = EntityUtils.toString(response.getEntity());
+            System.out.println(string);
         } else {
             System.out.println(response.getStatusLine().getStatusCode());
         }

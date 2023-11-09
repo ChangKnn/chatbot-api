@@ -1,10 +1,10 @@
 package com.kunchang.chatbot.api;
 
 import com.alibaba.fastjson2.JSON;
+import com.kunchang.chatbot.domain.chatgpt.IChatGPTApi;
 import com.kunchang.chatbot.domain.ykt.IYktApi;
 import com.kunchang.chatbot.domain.ykt.model.aggregates.QueryQuestionList;
 import com.kunchang.chatbot.domain.ykt.model.vo.Results;
-import com.kunchang.chatbot.domain.ykt.service.YktApi;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
@@ -35,6 +34,8 @@ public class SpringRunTest {
 
     @Autowired
     private IYktApi yktApi;
+    @Autowired
+    private IChatGPTApi chatGPTApi;
     @Test
     public void testIYkt() throws IOException {
         QueryQuestionList questionList = yktApi.queryQuestionList(classId, cookie);
@@ -44,6 +45,10 @@ public class SpringRunTest {
             String text = res.getContent().getText();
             logger.info("Text:{}", text);
         }
+    }
 
+    @Test
+    public void testChatGPT() throws IOException {
+        System.out.println(chatGPTApi.getGPTAns("北京邮电大学纯脑瘫"));
     }
 }
