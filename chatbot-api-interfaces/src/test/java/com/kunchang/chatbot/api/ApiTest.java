@@ -16,14 +16,16 @@ import org.junit.Test;
 import org.springframework.http.HttpStatusCode;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ApiTest {
     @Test
     public void queryQuestionList() throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
-        HttpGet get = new HttpGet("https://www.yuketang.cn/v/discussion/v2/topics/?limit=10&offset=0&cid=17556834&ol=8&rank=1&name=");
-        get.addHeader("cookie", "csrftoken=7PgbSKQ0UpDlmpNYVfxJCypDDJ1IkpC1; sessionid=m0r4b29705aovbznr2sme6xdahxp2oxq; classroomId=17556834; classroom_id=17556834; django_language=zh-cn");
+        HttpGet get = new HttpGet("");
+        get.addHeader("cookie", "");
         get.addHeader("content-Type", "application/json");
 
         CloseableHttpResponse response = httpClient.execute(get);
@@ -39,22 +41,22 @@ public class ApiTest {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
         HttpPost post = new HttpPost("https://www.yuketang.cn/v/discussion/v2/comment/");
-        post.addHeader("cookie", "csrftoken=7PgbSKQ0UpDlmpNYVfxJCypDDJ1IkpC1; sessionid=m0r4b29705aovbznr2sme6xdahxp2oxq; classroomId=17556834; classroom_id=17556834; django_language=zh-cn");
+        post.addHeader("cookie", "");
         post.addHeader("content-type", "application/json;charset=UTF-8");
         post.addHeader("referer", "https://www.yuketang.cn/v2/web/studentLog/17556834");
         post.addHeader("classroom-id", "17556834");
         post.addHeader("Uv-Id:", "3090");
         post.addHeader("X-Client", "web");
-        post.addHeader("X-Csrftoken", "7PgbSKQ0UpDlmpNYVfxJCypDDJ1IkpC1");
+        post.addHeader("X-Csrftoken", "");
         post.addHeader("Xt-Agent", "web");
         post.addHeader("Xtbz", "ykt");
         post.addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0");
 
         String paramJson = "{\n" +
-                "  \"to_user\": 25212695,\n" +
-                "  \"topic_id\": 12756641,\n" +
+                "  \"to_user\": ,\n" +
+                "  \"topic_id\": ,\n" +
                 "  \"content\": {\n" +
-                "    \"text\": \"论文的核心方法，创新点，关键词、参考文献，未来期望，论文的主要观点，实验方法以及给自己的启发\",\n" +
+                "    \"text\": \"\",\n" +
                 "    \"upload_images\": [],\n" +
                 "    \"accessory_list\": []\n" +
                 "  }\n" +
@@ -82,7 +84,7 @@ public class ApiTest {
 
         HttpPost post = new HttpPost("https://api.openai.com/v1/chat/completions");
         post.addHeader("Content-Type", "application/json");
-        post.addHeader("Authorization", "Bearer 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");
+        post.addHeader("Authorization", "Bearer ");
 
         String jsonParam = "{\n" +
                 "  \"model\": \"gpt-3.5-turbo\",\n" +
@@ -109,6 +111,21 @@ public class ApiTest {
             System.out.println(string);
         } else {
             System.out.println(response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    public void getCSRFToken() {
+        String cookie = "";
+        String pattern = "(?<=csrftoken=).*?(?=;)";
+        Pattern regex = Pattern.compile(pattern);
+        Matcher matcher = regex.matcher(cookie);
+
+        if (matcher.find()) {
+            System.out.println(matcher.group(0));
+            //return matcher.group(0);
+        } else {
+            System.out.println("获取失败");
         }
     }
 }

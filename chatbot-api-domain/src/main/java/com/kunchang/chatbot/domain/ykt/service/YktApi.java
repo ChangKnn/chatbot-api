@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.kunchang.chatbot.domain.ykt.IYktApi;
 import com.kunchang.chatbot.domain.ykt.model.aggregates.QueryQuestionList;
 import com.kunchang.chatbot.domain.ykt.model.req.AnsReq;
+import com.kunchang.chatbot.domain.ykt.model.req.PostEntity;
 import com.kunchang.chatbot.domain.ykt.model.req.ReqData;
 import com.kunchang.chatbot.domain.ykt.model.res.AnsRes;
 import org.apache.http.HttpStatus;
@@ -21,6 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Service
 public class YktApi implements IYktApi {
 
@@ -30,7 +34,8 @@ public class YktApi implements IYktApi {
     public QueryQuestionList queryQuestionList(String classId, String cookie) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
-        HttpGet get = new HttpGet("https://www.yuketang.cn/v/discussion/v2/topics/?limit=10&offset=0&cid="+ classId +"&ol=8&rank=1&name=");
+        // limit = 100 取大值，拉取所有数据
+        HttpGet get = new HttpGet("https://www.yuketang.cn/v/discussion/v2/topics/?limit=100&offset=0&cid="+ classId +"&ol=8&rank=1&name=");
         get.addHeader("cookie", cookie);
         get.addHeader("content-Type", "application/json");
 
@@ -45,33 +50,14 @@ public class YktApi implements IYktApi {
     }
 
     @Override
-    public boolean answerQuestion(String classId, String cookie, String token, String text) throws IOException {
+    public boolean answerQuestion(String classId, String cookie, PostEntity postEntity) throws IOException {
+
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        String CSRFToken = getCSRFToken(cookie);
 
-        HttpPost post = new HttpPost("https://www.yuketang.cn/v/discussion/v2/comment/");
-        post.addHeader("cookie", cookie);
-        post.addHeader("content-type", "application/json;charset=UTF-8");
-        post.addHeader("referer", "https://www.yuketang.cn/v2/web/studentLog/" + classId);
-        post.addHeader("classroom-id", classId);
-        post.addHeader("Uv-Id:", "3090");
-        post.addHeader("X-Client", "web");
-        post.addHeader("X-Csrftoken", token);
-        post.addHeader("Xt-Agent", "web");
-        post.addHeader("Xtbz", "ykt");
-        post.addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0");
+        HttpPost post = getHttpPost(classId, cookie, CSRFToken);
 
-//        String paramJson = "{\n" +
-//                "  \"to_user\": 25212695,\n" +
-//                "  \"topic_id\": 12756641,\n" +
-//                "  \"content\": {\n" +
-//                "    \"text\": \"论文的核心方法，创新点，关键词、参考文献，未来期望，论文的主要观点，实验方法以及给自己的启发\",\n" +
-//                "    \"upload_images\": [],\n" +
-//                "    \"accessory_list\": []\n" +
-//                "  }\n" +
-//                "}";
-
-        AnsReq ansReq = new AnsReq(new ReqData(text));
-        String paramJson = JSONObject.from(ansReq).toString();
+        String paramJson = JSONObject.from(postEntity).toString();
         StringEntity stringEntity = new StringEntity(paramJson, ContentType.create("text/json", "UTF-8"));
         post.setEntity(stringEntity);
 
@@ -83,6 +69,33 @@ public class YktApi implements IYktApi {
             return ansRes.isSuccess();
         } else {
             throw new RuntimeException("Error code :" + response.getStatusLine().getStatusCode());
+        }
+    }
+
+    private static HttpPost getHttpPost(String classId, String cookie, String CSRFToken) {
+        HttpPost post = new HttpPost("https://www.yuketang.cn/v/discussion/v2/comment/");
+        post.addHeader("cookie", cookie);
+        post.addHeader("content-type", "application/json;charset=UTF-8");
+        post.addHeader("referer", "https://www.yuketang.cn/v2/web/studentLog/" + classId);
+        post.addHeader("classroom-id", classId);
+        post.addHeader("Uv-Id:", "3090");
+        post.addHeader("X-Client", "web");
+        post.addHeader("X-Csrftoken", CSRFToken);
+        post.addHeader("Xt-Agent", "web");
+        post.addHeader("Xtbz", "ykt");
+        post.addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0");
+        return post;
+    }
+
+    private String getCSRFToken(String cookie) {
+        String pattern = "(?<=csrftoken=).*?(?=;)";
+        Pattern regex = Pattern.compile(pattern);
+        Matcher matcher = regex.matcher(cookie);
+
+        if (matcher.find()) {
+            return matcher.group(0);
+        } else {
+            return "获取失败";
         }
     }
 }

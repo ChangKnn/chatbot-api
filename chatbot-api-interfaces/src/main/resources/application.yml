@@ -1,15 +1,13 @@
 server:
   port: 8080
 
-spring:
-  aop:
-    proxy-target-class: true
+#spring:
+#  aop:
+#    proxy-target-class: true
 
 chat-bot:
-  classId: 17556834
-  cookie: csrftoken=7PgbSKQ0UpDlmpNYVfxJCypDDJ1IkpC1; sessionid=m0r4b29705aovbznr2sme6xdahxp2oxq; classroomId=17556834; classroom_id=17556834; django_language=zh-cn
-  token: 7PgbSKQ0UpDlmpNYVfxJCypDDJ1IkpC1
-  text: "2333"
-  proxyHost: 127.0.0.1
-  proxyPort: 7890
-  openAIToken: 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
+  classId:  # 课程ID
+  cookie:   # 雨课堂cookie
+  proxyHost:  # 代理服务器地址
+  proxyPort:  # 代理服务器端口
+  openAIToken:  # OpneAI API Token

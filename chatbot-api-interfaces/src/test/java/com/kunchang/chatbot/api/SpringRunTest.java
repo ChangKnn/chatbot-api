@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.kunchang.chatbot.domain.chatgpt.IChatGPTApi;
 import com.kunchang.chatbot.domain.ykt.IYktApi;
 import com.kunchang.chatbot.domain.ykt.model.aggregates.QueryQuestionList;
+import com.kunchang.chatbot.domain.ykt.model.req.PostEntity;
+import com.kunchang.chatbot.domain.ykt.model.vo.PostContent;
 import com.kunchang.chatbot.domain.ykt.model.vo.Results;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,10 +28,6 @@ public class SpringRunTest {
 
     @Value("${chat-bot.cookie}")
     private String cookie;
-    @Value("${chat-bot.token}")
-    private String token;
-    @Value("${chat-bot.text}")
-    private String text;
 
 
     @Autowired
@@ -43,12 +41,22 @@ public class SpringRunTest {
         List<Results> list = questionList.getData().getResults();
         for (Results res : list) {
             String text = res.getContent().getText();
+            String htmlRegex="<[^>]+>";
+            text = text.replaceAll(htmlRegex, "");
             logger.info("Text:{}", text);
         }
+
+       PostEntity entity = new PostEntity();
+        entity.setTopic_id(questionList.getData().getResults().get(0).getId());
+        entity.setTo_user(questionList.getData().getResults().get(0).getUser_id());
+        entity.setContent(new PostContent("关键词、参考文献!!!"));
+
+        yktApi.answerQuestion(classId, cookie, entity);
+        logger.info("Answer Completed.");
     }
 
     @Test
     public void testChatGPT() throws IOException {
-        System.out.println(chatGPTApi.getGPTAns("北京邮电大学纯脑瘫"));
+        System.out.println(chatGPTApi.getGPTAns("规范？"));
     }
 }
